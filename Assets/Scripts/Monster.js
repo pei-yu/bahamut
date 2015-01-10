@@ -1,19 +1,47 @@
 ﻿#pragma strict
-
+var hp:int=100;
 var atk : int = 2;
+var award: int =0;
 var speed : float = 8.0f;
-
+var isAttacking:boolean=false;
+var opponent:GameObject;
 function Update () {
-	rigidbody2D.velocity = new Vector2(speed, 0);
-//	transform.position.x += speed;
-}
-
-function OnTriggerEnter2D (other : Collider2D) {
-	if(
-		other.tag == "EnemyTower" ||
-		other.tag == "MyTower"
-	) {
-		other.GetComponent(Tower).LostHP(atk);
+	if(hp<=0){
+		if(gameObject.tag=="EnemyMon"){
+			GameObject.Find("Energy").SendMessage("AddEnergy",award);
+		}
 		Destroy(gameObject);
 	}
+	else{
+		if(opponent==null){
+			isAttacking=false;
+		}	
+		else{
+			opponent.SendMessage("Damage",atk);
+		}	
+		if(isAttacking==false){
+			rigidbody2D.velocity = new Vector2(speed, 0);
+		}	
+		else
+			rigidbody2D.velocity = new Vector2(0, 0);
+		
+//	transform.position.x += speed;
+	}
 }
+
+function Damage(atk:int){
+	hp -= atk;
+}
+function OnTriggerStay2D (other :Collider2D){
+
+	if(
+		(other.tag == "EnemyMon" && transform.tag =="MyMon") ||
+		(other.tag == "MyMon" && transform.tag =="EnemyMon") ||
+		(other.tag == "EnemyTower" && transform.tag =="MyMon") ||
+		(other.tag == "MyTower" && transform.tag =="EnemyMon")
+	){
+		isAttacking = true;
+		opponent=other.gameObject;
+	}
+}
+		
